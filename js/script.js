@@ -1,20 +1,6 @@
 /******************************************
-Treehouse Techdegree:
-FSJS project 2 - List Filter and Pagination
+project 2 - List Filter and Pagination
 ******************************************/
-
-// Study guide for this project - https://drive.google.com/file/d/1OD1diUsTMdpfMDv677TfL1xO2CEkykSz/view?usp=sharing
-
-/*** 
-   Add your global variables that store the DOM elements you will 
-   need to reference and/or manipulate. 
-   
-   But be mindful of which variables should be global and which 
-   should be locally scoped to one of the two main functions you're 
-   going to create. A good general rule of thumb is if the variable 
-   will only be used inside of a function, then it can be locally 
-   scoped to that function.
-***/
 
 // this will hold all the students info that's inside the ul element
 const page = document.querySelector(".page");
@@ -23,25 +9,18 @@ const page = document.querySelector(".page");
 let studentList_ul = document.querySelectorAll(".student-list li");
 
 // this configures how many items to show per page
-const itemsPerPage = 5;
+const itemsPerPage = 10;
 
-/*** 
-   Create the `showPage` function to hide all of the items in the 
-   list except for the ten you want to show.
-
-   Pro Tips: 
-     - Keep in mind that with a list of 54 students, the last page 
-       will only display four.
-     - Remember that the first student has an index of 0.
-     - Remember that a function `parameter` goes in the parens when 
-       you initially define the function, and it acts as a variable 
-       or a placeholder to represent the actual function `argument` 
-       that will be passed into the parens later when you call or 
-       "invoke" the function 
-***/
-
+/**
+ * showPage()
+ * @parameters list, page
+ * @return will show the records that faill within the supplied page range
+ */
 const showPage = (list, page) => {
+  // index of starting record to show
   let startIndex = page * itemsPerPage - itemsPerPage;
+
+  // index of last record to show
   let endIndex = page * itemsPerPage;
 
   for (let i = 0; i < list.length; i++) {
@@ -52,11 +31,11 @@ const showPage = (list, page) => {
   }
 };
 
-/*** 
-   Create the `appendPageLinks function` to generate, append, and add 
-   functionality to the pagination buttons.
-***/
 
+/**
+ * appendPageLinks()
+ * @return {div element} will set up pagination navigation and return it
+ */
 const appendPageLinks = list => {
   const createElement = (elementName, property, value, className = "") => {
     const element = document.createElement(elementName);
@@ -74,16 +53,11 @@ const appendPageLinks = list => {
   let currentPagination = document.querySelector(".pagination");
   if (currentPagination) {
     let childLinkItems = currentPagination.lastElementChild;
-    //  while (childLinkItems) {
-    //    currentPagination.removeChild(childLinkItems);
-    //    childLinkItems = currentPagination.lastElementChild;
-    //    //currentPagination.removeChild(currentPagination.firstChild);
-    //  }
     currentPagination.parentNode.removeChild(currentPagination);
   } else {
     list = studentList_ul;
   }
-  //   console.log(list.length);
+
   let numPages;
   if (list.length > 0) {
     numPages = Math.ceil(list.length / itemsPerPage);
@@ -96,9 +70,11 @@ const appendPageLinks = list => {
   div.className = "pagination";
   page.appendChild(div);
 
+  // creating ul element
   const ul = document.createElement("ul");
   div.appendChild(ul);
 
+  // create pagination links
   for (let i = 0; i < numPages; i++) {
     const li = document.createElement("li");
     ul.appendChild(li);
@@ -131,13 +107,10 @@ const appendPageLinks = list => {
 };
 
 /*
-<!-- student search HTML to add dynamically -->
-        <div class="student-search">
-          <input placeholder="Search for students...">
-          <button>Search</button>
-        </div>
-        <!-- end search -->
-        */
+/**
+ * addSearchFeature()
+ * @return  will dynamically add a search box, and handle when user searches
+ */
 const addSearchFeature = () => {
   // access page header
   const pageHeader = document.querySelector(".page-header");
@@ -149,17 +122,16 @@ const addSearchFeature = () => {
 
   // create input search box
   const searchInput = document.createElement("input");
-  searchInput.placeholder = "Search for students...";
+  searchInput.placeholder = "Search by name and email..";
   searchDiv.appendChild(searchInput);
 
   // create search button
   // commenting this out as I made the search box filter as you type
   // const searchButton = document.createElement("button");
   //searchButton.textContent = "Search";
-
   //searchDiv.appendChild(searchButton);
 
-  // handle when search button clicked
+  // handle when user searches in real time
   searchInput.addEventListener("input", e => {
     let searchedTerm = searchInput.value;
     let list = studentList_ul;
@@ -170,23 +142,38 @@ const addSearchFeature = () => {
       let studentName = list[i].querySelector("h3").textContent;
       let studentEmail = list[i].querySelector("span").textContent;
 
-      //if (searchedTerm === studentName || searchedTerm === studentEmail) {
+      // check if what was typed exists in the list
       if (
         studentName.includes(searchedTerm) ||
         studentEmail.includes(searchedTerm)
       ) {
-        searchResultArray = [list[i]];
+        // putting together an array to send to appendPageLinks later
+        searchResultArray.push(list[i]);
         list[i].style.display = "block";
+        // alert(searchedTerm);
+      } else if (searchedTerm.trim() == '') {
+        // filter items on page when loading first time
+        showPage(studentList_ul, 1);
+
+        // add links to the page
+        appendPageLinks(studentList_ul);
       } else {
-        list.innerHTML = "no results";
+        document.querySelector(".page ul").innerHTML = 'no results';
+        appendPageLinks();
       }
     } // -//end for
+
+
     if (searchResultArray === undefined || searchResultArray.length == 0) {
-      list.innerHTML = "no results";
+      document.querySelector(".page ul").innerHTML = 'no results';
+      appendPageLinks();
     } else {
+      // after user types search keyword update pagination navigation
       appendPageLinks(searchResultArray);
+
+      // after user types search keyword update search results
+      showPage(searchResultArray, 1);
     }
-    //appendPageLinks(studentList_ul);
   });
 };
 
