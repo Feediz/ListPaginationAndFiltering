@@ -2,9 +2,8 @@
 Treehouse Techdegree:
 FSJS project 2 - List Filter and Pagination
 ******************************************/
-   
-// Study guide for this project - https://drive.google.com/file/d/1OD1diUsTMdpfMDv677TfL1xO2CEkykSz/view?usp=sharing
 
+// Study guide for this project - https://drive.google.com/file/d/1OD1diUsTMdpfMDv677TfL1xO2CEkykSz/view?usp=sharing
 
 /*** 
    Add your global variables that store the DOM elements you will 
@@ -17,14 +16,12 @@ FSJS project 2 - List Filter and Pagination
    scoped to that function.
 ***/
 
-// this will hold list of students
-const li;
+// this will hold all the students info that's inside the ul element
+const page = document.querySelector(".page");
+const studentList_ul = document.querySelectorAll(".student-list li");
 
-// how many items to show per page
-const itemsPerPage = 10;
-
-
-
+// this configures how many items to show per page
+const itemsPerPage = 5;
 
 /*** 
    Create the `showPage` function to hide all of the items in the 
@@ -41,68 +38,72 @@ const itemsPerPage = 10;
        "invoke" the function 
 ***/
 
-function showPage(list, page) {
-   let startIndex = (page * itemsPerPage) - itemsPerPage;
-   let endIndex = page * itemsPerPage;
-   for(let i = 0; i < list.length; i++) {
-      if(i >= startIndex && i < endIndex) {
-         console.log(list[i]);
-      }
-   }
-}
+const showPage = (list, page) => {
+  let startIndex = page * itemsPerPage - itemsPerPage;
+  let endIndex = page * itemsPerPage;
 
+  for (let i = 0; i < list.length; i++) {
+    list[i].style.display = "none";
+    if (i >= startIndex && i < endIndex) {
+      list[i].style.display = "block";
+    }
+  }
+};
 
 /*** 
    Create the `appendPageLinks function` to generate, append, and add 
    functionality to the pagination buttons.
 ***/
-function appendPageLinks(list) {
-/*
-<div class="pagination">
-        <ul>
-          <li>
-            <a class="active" href="#">1</a>
-          </li>
-           <li>
-            <a href="#">2</a>
-          </li>
-           <li>
-            <a href="#">3</a>
-          </li>
-           <li>
-            <a href="#">4</a>
-          </li>
-           <li>
-            <a href="#">5</a>
-          </li>
-        </ul>
-      </div>
-      */
 
-     const div = document.createElement('div');
-     div.className = 'pagination';
-     
-     const ul = document.createElement('ul');
-     // inserting ul element inside div
-     div.appendChild(ul);
+const appendPageLinks = list => {
+  let numPages = Math.ceil(studentList_ul.length / itemsPerPage);
 
-     const numOfLIs = list.length / itemsPerPage;
+  // create div element
+  const div = document.createElement("div");
+  div.className = "pagination";
+  page.appendChild(div);
 
-     for(let i = 0; i < numOfLIs; i++) {
-         const li = document.createElement('li');
-         const anchorElement = document.createElement('a');
-         anchorElement.setAttribute('href', '#');
-         anchorElement.innerHTML = i;
-         li.appendPageLinks(anchorElement);
-         ul.appendChild(li);
-     }
+  const ul = document.createElement("ul");
+  div.appendChild(ul);
 
+  for (let i = 1; i < numPages; i++) {
+    const li = document.createElement("li");
+    ul.appendChild(li);
 
+    const a = document.createElement("a");
+    a.href = "#";
+    a.textContent = i;
+    if (i === 1) {
+      a.className = "active";
+    }
+    li.appendChild(a);
 
-}
+    // handle page click event
+    a.addEventListener("click", e => {
+      // show/hide items on the page
+      showPage(list, parseInt(e.target.textContent));
 
+      // grab all anchor tags to modify class name
+      const anchorTags = document.querySelectorAll("a");
+      for (let i = 0; i < anchorTags.length; i++) {
+        anchorTags[i].classList.remove("active");
+      }
+      e.target.className = "active";
 
+      // update h2 title to show page number
+      var h2Title = document.getElementsByTagName("h2")[0];
+      h2Title.innerHTML = "STUDENTS (Page " + e.target.textContent + ")";
+    });
+  } // -/end for loop
+};
 
+// filter items on page when loading first time
+showPage(studentList_ul, 1);
 
+// update h2 title to show page number
+var h2Title = document.getElementsByTagName("h2")[0];
+h2Title.innerHTML = "STUDENTS (page 1)";
 
+// add links to the page
+appendPageLinks(studentList_ul);
 // Remember to delete the comments that came with this file, and replace them with your own code comments.
