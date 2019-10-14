@@ -44,7 +44,7 @@ function showPage(list, page) {
   let endIndex = page * itemsPerPage;
   for (let i = 0; i < list.length; i++) {
     let item = list[i];
-    if (i >= startIndex && i < endIndex) {
+    if (i >= startIndex && i <= endIndex) {
       item.style.display = "block";
       //document.getElementById("pagination").appendChild(item);
       console.log(item);

@@ -18,7 +18,9 @@ FSJS project 2 - List Filter and Pagination
 
 // this will hold all the students info that's inside the ul element
 const page = document.querySelector(".page");
-const studentList_ul = document.querySelectorAll(".student-list li");
+
+// get list of all students on the page
+let studentList_ul = document.querySelectorAll(".student-list li");
 
 // this configures how many items to show per page
 const itemsPerPage = 5;
@@ -56,7 +58,38 @@ const showPage = (list, page) => {
 ***/
 
 const appendPageLinks = list => {
-  let numPages = Math.ceil(studentList_ul.length / itemsPerPage);
+  const createElement = (elementName, property, value, className = "") => {
+    const element = document.createElement(elementName);
+    if (value !== "") element[property] = value;
+    //alert(elementName);
+    if (className !== "") {
+      element["className"] = className;
+      //alert(element.textContent);
+    }
+
+    return element;
+  };
+
+  // remove pagination first
+  let currentPagination = document.querySelector(".pagination");
+  if (currentPagination) {
+    let childLinkItems = currentPagination.lastElementChild;
+    //  while (childLinkItems) {
+    //    currentPagination.removeChild(childLinkItems);
+    //    childLinkItems = currentPagination.lastElementChild;
+    //    //currentPagination.removeChild(currentPagination.firstChild);
+    //  }
+    currentPagination.parentNode.removeChild(currentPagination);
+  } else {
+    list = studentList_ul;
+  }
+  //   console.log(list.length);
+  let numPages;
+  if (list.length > 0) {
+    numPages = Math.ceil(list.length / itemsPerPage);
+  } else {
+    numPages = Math.ceil(studentList_ul.length / itemsPerPage);
+  }
 
   // create div element
   const div = document.createElement("div");
@@ -66,14 +99,14 @@ const appendPageLinks = list => {
   const ul = document.createElement("ul");
   div.appendChild(ul);
 
-  for (let i = 1; i < numPages; i++) {
+  for (let i = 0; i < numPages; i++) {
     const li = document.createElement("li");
     ul.appendChild(li);
 
     const a = document.createElement("a");
     a.href = "#";
-    a.textContent = i;
-    if (i === 1) {
+    a.textContent = i + 1;
+    if (i === 0) {
       a.className = "active";
     }
     li.appendChild(a);
@@ -96,6 +129,69 @@ const appendPageLinks = list => {
     });
   } // -/end for loop
 };
+
+/*
+<!-- student search HTML to add dynamically -->
+        <div class="student-search">
+          <input placeholder="Search for students...">
+          <button>Search</button>
+        </div>
+        <!-- end search -->
+        */
+const addSearchFeature = () => {
+  // access page header
+  const pageHeader = document.querySelector(".page-header");
+
+  // create div element
+  const searchDiv = document.createElement("div");
+  searchDiv.className = "student-search";
+  pageHeader.appendChild(searchDiv);
+
+  // create input search box
+  const searchInput = document.createElement("input");
+  searchInput.placeholder = "Search for students...";
+  searchDiv.appendChild(searchInput);
+
+  // create search button
+  // commenting this out as I made the search box filter as you type
+  // const searchButton = document.createElement("button");
+  //searchButton.textContent = "Search";
+
+  //searchDiv.appendChild(searchButton);
+
+  // handle when search button clicked
+  searchInput.addEventListener("input", e => {
+    let searchedTerm = searchInput.value;
+    let list = studentList_ul;
+    let searchResultArray = new Array();
+
+    for (let i = 0; i < list.length; i++) {
+      list[i].style.display = "none";
+      let studentName = list[i].querySelector("h3").textContent;
+      let studentEmail = list[i].querySelector("span").textContent;
+
+      //if (searchedTerm === studentName || searchedTerm === studentEmail) {
+      if (
+        studentName.includes(searchedTerm) ||
+        studentEmail.includes(searchedTerm)
+      ) {
+        searchResultArray = [list[i]];
+        list[i].style.display = "block";
+      } else {
+        list.innerHTML = "no results";
+      }
+    } // -//end for
+    if (searchResultArray === undefined || searchResultArray.length == 0) {
+      list.innerHTML = "no results";
+    } else {
+      appendPageLinks(searchResultArray);
+    }
+    //appendPageLinks(studentList_ul);
+  });
+};
+
+// add search box to dom
+addSearchFeature();
 
 // filter items on page when loading first time
 showPage(studentList_ul, 1);
