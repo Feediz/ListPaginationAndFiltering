@@ -11,10 +11,17 @@ let studentList_ul = document.querySelectorAll(".student-list li");
 // this configures how many items to show per page
 const itemsPerPage = 10;
 
+// no results div
+const noResultsDisplay = document.createElement("div");
+noResultsDisplay.className = "noResults";
+noResultsDisplay.textContent = "No Results";
+noResultsDisplay.style.display = "none";
+page.appendChild(noResultsDisplay);
+
 /**
  * showPage()
  * @parameters list, page
- * @return will show the records that faill within the supplied page range
+ * @return will show the records that fall within the supplied page range
  */
 const showPage = (list, page) => {
   // index of starting record to show
@@ -31,7 +38,6 @@ const showPage = (list, page) => {
   }
 };
 
-
 /**
  * appendPageLinks()
  * @return {div element} will set up pagination navigation and return it
@@ -40,16 +46,15 @@ const appendPageLinks = list => {
   const createElement = (elementName, property, value, className = "") => {
     const element = document.createElement(elementName);
     if (value !== "") element[property] = value;
-    //alert(elementName);
+
     if (className !== "") {
       element["className"] = className;
-      //alert(element.textContent);
     }
 
     return element;
   };
 
-  // remove pagination first
+  // remove/resetting pagination first
   let currentPagination = document.querySelector(".pagination");
   if (currentPagination) {
     let childLinkItems = currentPagination.lastElementChild;
@@ -58,8 +63,9 @@ const appendPageLinks = list => {
     list = studentList_ul;
   }
 
+  // start setting up pagination links
   let numPages;
-  if (list.length > 0) {
+  if (list !== undefined && list.length > 0) {
     numPages = Math.ceil(list.length / itemsPerPage);
   } else {
     numPages = Math.ceil(studentList_ul.length / itemsPerPage);
@@ -137,42 +143,58 @@ const addSearchFeature = () => {
     let list = studentList_ul;
     let searchResultArray = new Array();
 
-    for (let i = 0; i < list.length; i++) {
-      list[i].style.display = "none";
-      let studentName = list[i].querySelector("h3").textContent;
-      let studentEmail = list[i].querySelector("span").textContent;
+    //console.log("you typed: " + searchedTerm.length);
+    if (searchedTerm.length === 0) {
+      // filter items on page when loading first time
+      showPage(list, 1);
 
-      // check if what was typed exists in the list
-      if (
-        studentName.includes(searchedTerm) ||
-        studentEmail.includes(searchedTerm)
-      ) {
-        // putting together an array to send to appendPageLinks later
-        searchResultArray.push(list[i]);
-        list[i].style.display = "block";
-        // alert(searchedTerm);
-      } else if (searchedTerm.trim() == '') {
-        // filter items on page when loading first time
-        showPage(studentList_ul, 1);
+      // update h2 title to show page number
+      let h2Title = document.getElementsByTagName("h2")[0];
+      h2Title.innerHTML = "STUDENTS (page 1)";
 
-        // add links to the page
-        appendPageLinks(studentList_ul);
-      } else {
-        document.querySelector(".page ul").innerHTML = 'no results';
-        appendPageLinks();
-      }
-    } // -//end for
-
-
-    if (searchResultArray === undefined || searchResultArray.length == 0) {
-      document.querySelector(".page ul").innerHTML = 'no results';
-      appendPageLinks();
+      // add links to the page
+      appendPageLinks(list);
     } else {
-      // after user types search keyword update pagination navigation
-      appendPageLinks(searchResultArray);
+      for (let i = 0; i < list.length; i++) {
+        list[i].style.display = "none";
+        let studentName = list[i].querySelector("h3").textContent;
+        let studentEmail = list[i].querySelector("span").textContent;
 
-      // after user types search keyword update search results
-      showPage(searchResultArray, 1);
+        // check if the searched term exists in the list
+        if (
+          studentName.includes(searchedTerm) ||
+          studentEmail.includes(searchedTerm)
+        ) {
+          // putting together an array to send to appendPageLinks later
+          searchResultArray.push(list[i]);
+          list[i].style.display = "block";
+        } else if (searchedTerm.trim() == "") {
+          // filter items on page when loading first time
+          showPage(studentList_ul, 1);
+
+          // add links to the page
+          appendPageLinks(studentList_ul);
+        }
+      } // -//end for
+
+      if (searchResultArray === undefined || searchResultArray.length == 0) {
+        // show no results
+        noResultsDisplay.textContent =
+          "No results for the term: " + searchedTerm;
+        noResultsDisplay.style.display = "block";
+
+        showPage(searchResultArray, 1);
+        appendPageLinks(searchResultArray);
+      } else {
+        // hide no results
+        noResultsDisplay.style.display = "none";
+
+        // after user types search keyword update pagination navigation
+        appendPageLinks(searchResultArray);
+
+        // after user types search keyword update search results
+        showPage(searchResultArray, 1);
+      }
     }
   });
 };
@@ -184,9 +206,8 @@ addSearchFeature();
 showPage(studentList_ul, 1);
 
 // update h2 title to show page number
-var h2Title = document.getElementsByTagName("h2")[0];
+let h2Title = document.getElementsByTagName("h2")[0];
 h2Title.innerHTML = "STUDENTS (page 1)";
 
 // add links to the page
 appendPageLinks(studentList_ul);
-// Remember to delete the comments that came with this file, and replace them with your own code comments.
